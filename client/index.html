@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Friend Poker</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Lobby -->
+  <div id="lobby">
+    <div class="lobby-box">
+      <h1>Friend Poker</h1>
+      <p class="subtitle">Texas Hold'em — play with friends</p>
+      <input id="nameInput" type="text" placeholder="Your name" maxlength="16" />
+      <div class="lobby-buttons">
+        <button id="createBtn">Create Room</button>
+        <div class="join-row">
+          <input id="roomInput" type="text" placeholder="Room code" maxlength="6" />
+          <button id="joinBtn">Join</button>
+        </div>
+      </div>
+      <p id="lobbyError" class="error"></p>
+    </div>
+  </div>
+
+  <!-- Game Table -->
+  <div id="gameTable" class="hidden">
+    <div class="table-header">
+      <span id="roomDisplay"></span>
+      <span id="stageDisplay"></span>
+    </div>
+
+    <!-- Community cards + pot -->
+    <div class="center-area">
+      <div id="communityCards" class="card-row"></div>
+      <div id="potDisplay" class="pot">Pot: 0</div>
+    </div>
+
+    <!-- Seats around the table -->
+    <div id="seats"></div>
+
+    <!-- Waiting / Start -->
+    <div id="waitingPanel" class="panel">
+      <p>Share the room code with friends:</p>
+      <div class="room-code" id="roomCode"></div>
+      <button id="startBtn">Start Game</button>
+      <p class="hint">Need at least 2 players</p>
+    </div>
+
+    <!-- Betting controls -->
+    <div id="actionPanel" class="panel hidden">
+      <div class="bet-info">
+        <span id="potInfo"></span>
+        <span id="toCallInfo"></span>
+        <span id="limitInfo"></span>
+      </div>
+      <div class="action-buttons">
+        <button id="foldBtn" class="btn-fold">Fold</button>
+        <button id="checkBtn" class="btn-check">Check</button>
+        <button id="callBtn" class="btn-call">Call</button>
+        <button id="raiseBtn" class="btn-raise">Raise</button>
+        <button id="allInBtn" class="btn-allin">All In</button>
+      </div>
+      <div class="raise-row">
+        <input id="raiseInput" type="number" min="0" step="10" placeholder="Raise to..." />
+        <span id="chipsDisplay"></span>
+      </div>
+    </div>
+
+    <!-- Showdown overlay -->
+    <div id="showdownOverlay" class="hidden overlay">
+      <div class="showdown-box">
+        <h2>Showdown</h2>
+        <div id="showdownResults"></div>
+        <p class="hint">Next hand starting in 5s…</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>

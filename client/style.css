@@ -1,0 +1,175 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #1a1a2e;
+  color: #eee;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* ── Lobby ── */
+#lobby { display: flex; align-items: center; justify-content: center; width: 100%; }
+.lobby-box {
+  background: #16213e;
+  border: 2px solid #0f3460;
+  border-radius: 16px;
+  padding: 40px;
+  width: 360px;
+  text-align: center;
+  box-shadow: 0 8px 32px #0006;
+}
+.lobby-box h1 { font-size: 2rem; color: #e94560; margin-bottom: 6px; }
+.subtitle { color: #aaa; margin-bottom: 24px; font-size: .9rem; }
+#nameInput, #roomInput {
+  width: 100%; padding: 10px 14px; border-radius: 8px;
+  border: 1px solid #0f3460; background: #0f3460;
+  color: #eee; font-size: 1rem; margin-bottom: 12px; outline: none;
+}
+#nameInput:focus, #roomInput:focus { border-color: #e94560; }
+.lobby-buttons { display: flex; flex-direction: column; gap: 10px; }
+button {
+  padding: 10px 20px; border: none; border-radius: 8px;
+  font-size: 1rem; cursor: pointer; font-weight: 600; transition: opacity .2s;
+}
+button:hover { opacity: .85; }
+#createBtn { background: #e94560; color: #fff; }
+.join-row { display: flex; gap: 8px; }
+.join-row #roomInput { margin: 0; flex: 1; }
+#joinBtn { background: #533483; color: #fff; white-space: nowrap; }
+.error { color: #e94560; margin-top: 12px; min-height: 20px; font-size: .85rem; }
+
+/* ── Game Table ── */
+#gameTable {
+  width: 100vw; height: 100vh;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  position: relative;
+  background: radial-gradient(ellipse 80% 60% at 50% 50%, #1a5c2e 0%, #0d3320 60%, #0a2218 100%);
+}
+.table-header {
+  position: absolute; top: 12px; left: 0; right: 0;
+  display: flex; justify-content: space-between; padding: 0 20px;
+  font-size: .9rem; color: #aaa;
+}
+#stageDisplay { text-transform: uppercase; color: #f0c040; font-weight: 700; }
+
+/* ── Community + Pot ── */
+.center-area {
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  z-index: 2;
+}
+.card-row { display: flex; gap: 8px; min-height: 90px; align-items: center; }
+.pot { font-size: 1.3rem; font-weight: 700; color: #f0c040; }
+
+/* ── Cards ── */
+.card {
+  width: 60px; height: 86px;
+  border-radius: 8px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  font-size: 1.1rem; font-weight: 800;
+  border: 2px solid #555;
+  background: #fff;
+  color: #222;
+  box-shadow: 2px 3px 8px #0006;
+  transition: transform .2s;
+  position: relative;
+}
+.card.red { color: #c0392b; }
+.card.back {
+  background: linear-gradient(135deg, #1a3a6e 0%, #0d1f40 100%);
+  border-color: #2255aa;
+}
+.card .rank { font-size: 1.3rem; line-height: 1; }
+.card .suit { font-size: 1rem; line-height: 1; }
+.card.hidden-card { background: repeating-linear-gradient(45deg,#1a3a6e,#1a3a6e 5px,#0d1f40 5px,#0d1f40 10px); }
+
+/* ── Seats ── */
+#seats { position: absolute; inset: 0; pointer-events: none; }
+.seat {
+  position: absolute;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  pointer-events: none;
+  min-width: 100px;
+}
+.seat-name {
+  font-size: .78rem; font-weight: 700; white-space: nowrap;
+  background: #0008; padding: 2px 8px; border-radius: 12px;
+}
+.seat-chips { font-size: .75rem; color: #f0c040; }
+.seat-bet { font-size: .72rem; color: #80cfa9; }
+.seat.is-active .seat-name { background: #e94560cc; animation: pulse 1s infinite; }
+.seat.folded { opacity: .4; }
+.seat.is-me .seat-name { border: 2px solid #f0c040; }
+.seat .hand-cards { display: flex; gap: 4px; }
+.seat .hand-cards .card { width: 40px; height: 58px; font-size: .8rem; }
+.dealer-chip {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: #f0c040; color: #222; font-size: .6rem; font-weight: 900;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid #a08000;
+}
+@keyframes pulse { 0%,100%{box-shadow:0 0 0 0 #e9456088} 50%{box-shadow:0 0 0 6px #e9456000} }
+
+/* ── Panels ── */
+.panel {
+  position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%);
+  background: #16213edd; border: 1px solid #0f3460;
+  border-radius: 14px; padding: 14px 20px;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  backdrop-filter: blur(6px);
+  min-width: 340px;
+}
+.room-code {
+  font-size: 2.4rem; font-weight: 900; letter-spacing: .3em;
+  color: #f0c040; margin: 4px 0;
+}
+.hint { font-size: .8rem; color: #888; }
+#startBtn { background: #27ae60; color: #fff; }
+
+/* Action panel */
+.bet-info { display: flex; gap: 16px; font-size: .8rem; color: #aaa; }
+.action-buttons { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.btn-fold  { background: #c0392b; color:#fff; }
+.btn-check { background: #2980b9; color:#fff; }
+.btn-call  { background: #27ae60; color:#fff; }
+.btn-raise { background: #8e44ad; color:#fff; }
+.btn-allin { background: #e67e22; color:#fff; }
+.raise-row { display: flex; gap: 8px; align-items: center; width: 100%; }
+.raise-row input {
+  flex: 1; padding: 7px 12px; border-radius: 8px;
+  border: 1px solid #0f3460; background: #0f3460;
+  color: #eee; font-size: .95rem; outline: none;
+}
+.raise-row input:focus { border-color: #8e44ad; }
+#chipsDisplay { font-size: .8rem; color: #f0c040; white-space: nowrap; }
+
+/* ── Overlay ── */
+.overlay {
+  position: absolute; inset: 0;
+  background: #000a;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 100;
+}
+.showdown-box {
+  background: #16213e; border: 2px solid #e94560;
+  border-radius: 16px; padding: 32px 40px;
+  text-align: center; min-width: 300px;
+}
+.showdown-box h2 { color: #f0c040; margin-bottom: 16px; }
+.winner-line { margin: 6px 0; font-size: 1rem; }
+.winner-line strong { color: #f0c040; }
+.winner-line .hand-name { color: #80cfa9; font-style: italic; }
+
+/* ── Helpers ── */
+.hidden { display: none !important; }
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  .card { width: 44px; height: 64px; font-size: .8rem; }
+  .seat .hand-cards .card { width: 32px; height: 46px; font-size: .65rem; }
+}
