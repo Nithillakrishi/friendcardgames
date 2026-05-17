@@ -102,9 +102,14 @@ class Game {
     if (!p) return null;
     const isPotLimit = this.stage === 'preflop';
     const callAmount = Math.min(this.currentBet - p.bet, p.chips);
-    // Pot limit: max raise-to = pot + call amount (pot after calling)
-    const potAfterCall = this.pot + callAmount;
-    const maxRaiseTo = isPotLimit ? p.bet + callAmount + potAfterCall : Infinity;
+    // Pot limit formula: Total Raise Amount = (3 × Last Bet) + Remaining Pot
+    // = 3 × currentBet + (pot − currentBet) = 2 × currentBet + pot
+    // This gives the max "raise to" level (new currentBet) for any player.
+    // Cap to player's total available chips.
+    const plPotMax = 2 * this.currentBet + this.pot;
+    const maxRaiseTo = isPotLimit
+      ? Math.min(plPotMax, p.bet + p.chips)
+      : Infinity;
     const minRaiseTo = this.currentBet + this.minRaise;
     return {
       isPotLimit, potSize: this.pot, currentBet: this.currentBet,

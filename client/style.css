@@ -187,19 +187,22 @@ button:active { filter: brightness(.8); }
 #raiseInput:focus { border-color: #8e44ad; }
 #raiseConfirm { padding: 8px 16px; flex-shrink: 0; }
 
-/* ── Overlay ── */
-.overlay {
-  position: fixed; inset: 0; background: #000b;
-  display: flex; align-items: center; justify-content: center; z-index: 200;
+/* ── Winner banner (non-blocking toast at top) ── */
+.winner-banner {
+  position: fixed; top: 36px; left: 50%; transform: translateX(-50%);
+  background: #16213eee; border: 1px solid #e94560;
+  border-radius: 10px; padding: 8px 20px;
+  z-index: 200; text-align: center;
+  backdrop-filter: blur(6px);
+  animation: fadeInDown .3s ease;
 }
-.showdown-box {
-  background: #16213e; border: 2px solid #e94560; border-radius: 16px;
-  padding: 28px 36px; text-align: center; min-width: min(300px, 90vw); max-width: 90vw;
+.winner-banner .winner-line { font-size: .9rem; white-space: nowrap; }
+.winner-banner .winner-line strong { color: #f0c040; }
+.winner-banner .winner-line .hand-name { color: #80cfa9; font-style: italic; }
+@keyframes fadeInDown {
+  from { opacity:0; transform: translateX(-50%) translateY(-10px); }
+  to   { opacity:1; transform: translateX(-50%) translateY(0); }
 }
-.showdown-box h2 { color: #f0c040; margin-bottom: 14px; }
-.winner-line { margin: 6px 0; font-size: .95rem; }
-.winner-line strong { color: #f0c040; }
-.winner-line .hand-name { color: #80cfa9; font-style: italic; }
 
 /* ── Helpers ── */
 .hidden { display: none !important; }

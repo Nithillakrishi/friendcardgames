@@ -19,8 +19,8 @@ const roomCode        = document.getElementById('roomCode');
 const startBtn        = document.getElementById('startBtn');
 const waitingPanel    = document.getElementById('waitingPanel');
 const actionPanel     = document.getElementById('actionPanel');
-const showdownOverlay = document.getElementById('showdownOverlay');
-const showdownResults = document.getElementById('showdownResults');
+const winnerBanner  = document.getElementById('winnerBanner');
+const winnerResults = document.getElementById('winnerResults');
 const potInfo         = document.getElementById('potInfo');
 const toCallInfo      = document.getElementById('toCallInfo');
 const limitInfo       = document.getElementById('limitInfo');
@@ -159,12 +159,12 @@ socket.on('gameState', state => {
 
 socket.on('showdown', ({ results }) => {
   if (!lastState) return;
-  showdownResults.innerHTML = results.map(r => {
+  winnerResults.innerHTML = results.map(r => {
     const p = lastState.players[r.index];
-    return `<div class="winner-line"><strong>${p ? p.name : 'Player'}</strong> wins <strong>${r.chips}</strong> chips with <span class="hand-name">${r.handName}</span></div>`;
+    return `<div class="winner-line"><strong>${p ? p.name : 'Player'}</strong> wins <strong>${r.chips}</strong> with <span class="hand-name">${r.handName}</span></div>`;
   }).join('');
-  showdownOverlay.classList.remove('hidden');
-  setTimeout(() => showdownOverlay.classList.add('hidden'), 4800);
+  winnerBanner.classList.remove('hidden');
+  setTimeout(() => winnerBanner.classList.add('hidden'), 3500);
 });
 
 // ── Main render ──
