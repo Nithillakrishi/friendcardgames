@@ -5,6 +5,7 @@ const socket = io();
 let myPlayerId = null;
 let myRoomId   = null;
 let lastState  = null;
+let lastInfo   = null; // bettingInfo snapshot for raise builder
 
 // ── DOM ──
 const lobby           = document.getElementById('lobby');
@@ -24,20 +25,21 @@ const potInfo         = document.getElementById('potInfo');
 const toCallInfo      = document.getElementById('toCallInfo');
 const limitInfo       = document.getElementById('limitInfo');
 const raiseInput      = document.getElementById('raiseInput');
-const chipsDisplay    = document.getElementById('chipsDisplay');
-// Desktop
+const raiseBuilder    = document.getElementById('raiseBuilder');
+const raiseLimits     = document.getElementById('raiseLimits');
+const raisePresets    = document.getElementById('raisePresets');
+// Desktop / mobile
 const desktopLayout   = document.getElementById('desktopLayout');
 const communityCards  = document.getElementById('communityCards');
 const potDisplay      = document.getElementById('potDisplay');
 const seatsEl         = document.getElementById('seats');
-// Mobile
+const myHandDesktop   = document.getElementById('myHandDesktop');
 const mobileLayout    = document.getElementById('mobileLayout');
 const mobileOpponents = document.getElementById('mobileOpponents');
 const communityMobile = document.getElementById('communityCardsMobile');
 const potMobile       = document.getElementById('potDisplayMobile');
 const myHandStrip     = document.getElementById('myHandStrip');
 
-// ── Mobile detection ──
 function isMobile() { return window.innerWidth <= 600; }
 
 // ── Suit symbols ──
@@ -56,17 +58,18 @@ function facedownEl() {
   return el;
 }
 
-// ── Desktop seat positions ──
+// ── Desktop seat positions (opponents around the table) ──
+// Position 0 = my seat (rendered separately in #myHandDesktop), 1-8 = opponents
 const SEAT_POSITIONS = [
-  { bottom: '7%',  left: '50%', transform: 'translateX(-50%)' },
-  { bottom: '22%', left: '12%' },
-  { top: '30%',    left: '6%'  },
-  { top: '10%',    left: '22%' },
-  { top: '5%',     left: '50%', transform: 'translateX(-50%)' },
-  { top: '10%',    right: '22%' },
-  { top: '30%',    right: '6%'  },
+  null, // my seat – handled separately
+  { bottom: '22%', left: '12%'  },
+  { top:    '30%', left: '5%'   },
+  { top:    '10%', left: '22%'  },
+  { top:    '4%',  left: '50%', transform: 'translateX(-50%)' },
+  { top:    '10%', right: '22%' },
+  { top:    '30%', right: '5%'  },
   { bottom: '22%', right: '12%' },
-  { bottom: '7%',  right: '12%' },
+  { bottom: '8%',  right: '12%' },
 ];
 
 // ── Lobby ──
@@ -87,14 +90,50 @@ nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') document.get
 
 // ── Game controls ──
 startBtn.addEventListener('click', () => socket.emit('startGame'));
-document.getElementById('foldBtn') .addEventListener('click', () => socket.emit('action', { type: 'fold' }));
-document.getElementById('checkBtn').addEventListener('click', () => socket.emit('action', { type: 'check' }));
-document.getElementById('callBtn') .addEventListener('click', () => socket.emit('action', { type: 'call' }));
-document.getElementById('allInBtn').addEventListener('click', () => socket.emit('action', { type: 'allin' }));
+
+document.getElementById('foldBtn') .addEventListener('click', () => {
+  raiseBuilder.classList.add('hidden');
+  socket.emit('action', { type: 'fold' });
+});
+document.getElementById('checkBtn').addEventListener('click', () => {
+  raiseBuilder.classList.add('hidden');
+  socket.emit('action', { type: 'check' });
+});
+document.getElementById('callBtn') .addEventListener('click', () => {
+  raiseBuilder.classList.add('hidden');
+  socket.emit('action', { type: 'call' });
+});
+document.getElementById('allInBtn').addEventListener('click', () => {
+  raiseBuilder.classList.add('hidden');
+  socket.emit('action', { type: 'allin' });
+});
+// Toggle raise builder
 document.getElementById('raiseBtn').addEventListener('click', () => {
+  raiseBuilder.classList.toggle('hidden');
+});
+// Confirm raise
+document.getElementById('raiseConfirm').addEventListener('click', () => {
   const amt = parseInt(raiseInput.value, 10);
   if (isNaN(amt)) { showError('Enter raise amount'); return; }
   socket.emit('action', { type: 'raise', amount: amt });
+  raiseBuilder.classList.add('hidden');
+});
+// +/- adjusters
+document.getElementById('raisePlus').addEventListener('click', () => {
+  if (!lastInfo) return;
+  const step = lastInfo.minRaise || 20;
+  raiseInput.value = Math.min(
+    parseInt(raiseInput.value || lastInfo.minRaiseTo, 10) + step,
+    lastInfo.isPotLimit ? Math.floor(lastInfo.maxRaiseTo) : lastInfo.myChipsTotal
+  );
+});
+document.getElementById('raiseMinus').addEventListener('click', () => {
+  if (!lastInfo) return;
+  const step = lastInfo.minRaise || 20;
+  raiseInput.value = Math.max(
+    parseInt(raiseInput.value || lastInfo.minRaiseTo, 10) - step,
+    lastInfo.minRaiseTo
+  );
 });
 
 // ── Socket events ──
@@ -130,8 +169,7 @@ socket.on('showdown', ({ results }) => {
 
 // ── Main render ──
 function renderState(state) {
-  const { stage, pot, community, actionIndex, dealerIndex, players, bettingInfo } = state;
-
+  const { stage, players, actionIndex, bettingInfo } = state;
   stageDisplay.textContent = stage;
 
   const myPlayer = players.find(p => p.id === myPlayerId);
@@ -149,11 +187,7 @@ function renderState(state) {
   if (stage === 'waiting') {
     waitingPanel.classList.remove('hidden');
     actionPanel.classList.add('hidden');
-    // On mobile, move panels inside mobileLayout
-    if (isMobile()) {
-      mobileLayout.appendChild(waitingPanel);
-      mobileLayout.appendChild(actionPanel);
-    }
+    if (isMobile()) { mobileLayout.appendChild(waitingPanel); }
   } else {
     waitingPanel.classList.add('hidden');
     if (isMyTurn && bettingInfo) {
@@ -162,6 +196,7 @@ function renderState(state) {
       if (isMobile()) mobileLayout.appendChild(actionPanel);
     } else {
       actionPanel.classList.add('hidden');
+      raiseBuilder.classList.add('hidden');
     }
   }
 }
@@ -173,22 +208,25 @@ function renderDesktop(state, myPlayer, isMyTurn) {
   mobileLayout.classList.add('hidden');
   desktopLayout.classList.remove('hidden');
 
-  // Community
+  // Community cards
   communityCards.innerHTML = '';
   for (const c of community) communityCards.appendChild(cardEl(c));
   potDisplay.textContent = `Pot: ${pot}`;
 
-  // Seats — reorder so current player is at position 0
+  // Opponent seats (absolute positioning around the table)
   seatsEl.innerHTML = '';
   const myIdx = players.findIndex(p => p.id === myPlayerId);
   const n = players.length;
 
   players.forEach((player, realIdx) => {
     const displayPos = ((realIdx - myIdx) + n) % n;
-    const pos = SEAT_POSITIONS[displayPos] || SEAT_POSITIONS[0];
+    if (displayPos === 0) return; // my seat rendered in #myHandDesktop
+
+    const pos = SEAT_POSITIONS[Math.min(displayPos, SEAT_POSITIONS.length - 1)];
+    if (!pos) return;
+
     const seat = document.createElement('div');
     seat.className = 'seat';
-    if (player.id === myPlayerId) seat.classList.add('is-me');
     if (player.folded) seat.classList.add('folded');
     if (realIdx === actionIndex && !player.folded) seat.classList.add('is-active');
     Object.entries(pos).forEach(([k, v]) => seat.style[k] = v);
@@ -201,7 +239,7 @@ function renderDesktop(state, myPlayer, isMyTurn) {
 
     const nameEl = document.createElement('div');
     nameEl.className = 'seat-name';
-    nameEl.textContent = player.name + (player.allIn ? ' [ALL-IN]' : '') + (player.folded ? ' [FOLD]' : '');
+    nameEl.textContent = player.name + (player.allIn ? ' ⚡' : '') + (player.folded ? ' ✗' : '');
     seat.appendChild(nameEl);
 
     const chipsEl = document.createElement('div');
@@ -226,6 +264,39 @@ function renderDesktop(state, myPlayer, isMyTurn) {
     seat.appendChild(handRow);
     seatsEl.appendChild(seat);
   });
+
+  // My hand strip (always visible, anchored above action panel)
+  myHandDesktop.innerHTML = '';
+  if (myPlayer && state.stage !== 'waiting') {
+    const myRealIdx = players.indexOf(myPlayer);
+    const isDealer  = myRealIdx === dealerIndex;
+    const isActive  = myRealIdx === actionIndex;
+
+    const cardsDiv = document.createElement('div');
+    cardsDiv.className = 'my-cards';
+    if (myPlayer.hand && myPlayer.hand.length > 0) {
+      for (const c of myPlayer.hand) cardsDiv.appendChild(cardEl(c));
+    } else if (myPlayer.cardCount > 0 && !myPlayer.folded) {
+      for (let i = 0; i < myPlayer.cardCount; i++) cardsDiv.appendChild(facedownEl());
+    }
+
+    const infoDiv = document.createElement('div');
+    infoDiv.className = 'my-info';
+    infoDiv.innerHTML = `
+      <div class="my-name">${myPlayer.name}${isDealer ? ' 🅓' : ''}</div>
+      <div class="my-chips">${myPlayer.chips} chips</div>
+      ${myPlayer.bet > 0 ? `<div class="my-bet">Bet: ${myPlayer.bet}</div>` : ''}
+      ${myPlayer.folded ? '<div class="my-status">FOLDED</div>' : ''}
+      ${myPlayer.allIn ? '<div class="my-status">ALL-IN</div>' : ''}
+      ${isActive && !myPlayer.folded ? '<div class="my-status">YOUR TURN</div>' : ''}
+    `;
+
+    myHandDesktop.appendChild(cardsDiv);
+    myHandDesktop.appendChild(infoDiv);
+    myHandDesktop.classList.remove('hidden');
+  } else {
+    myHandDesktop.classList.add('hidden');
+  }
 }
 
 // ── Mobile render ──
@@ -235,12 +306,11 @@ function renderMobile(state, myPlayer, isMyTurn) {
   desktopLayout.classList.add('hidden');
   mobileLayout.classList.remove('hidden');
 
-  // Community
   communityMobile.innerHTML = '';
   for (const c of community) communityMobile.appendChild(cardEl(c));
   potMobile.textContent = `Pot: ${pot}`;
 
-  // Opponents (everyone except me)
+  // Opponents
   mobileOpponents.innerHTML = '';
   players.forEach((player, realIdx) => {
     if (player.id === myPlayerId) return;
@@ -283,49 +353,107 @@ function renderMobile(state, myPlayer, isMyTurn) {
     mobileOpponents.appendChild(seat);
   });
 
-  // My hand strip
+  // My hand
   myHandStrip.innerHTML = '';
-  if (myPlayer && myPlayer.hand && myPlayer.hand.length > 0) {
-    const info = document.createElement('div');
-    info.className = 'my-info';
-
+  if (myPlayer && state.stage !== 'waiting') {
     const myRealIdx = players.indexOf(myPlayer);
-    const isDealer = myRealIdx === dealerIndex;
-    const isActive = myRealIdx === actionIndex;
+    const isDealer  = myRealIdx === dealerIndex;
+    const isActive  = myRealIdx === actionIndex;
 
-    info.innerHTML = `
+    if (myPlayer.hand && myPlayer.hand.length > 0) {
+      for (const c of myPlayer.hand) {
+        const el = cardEl(c); myHandStrip.appendChild(el);
+      }
+    } else if (myPlayer.cardCount > 0 && !myPlayer.folded) {
+      for (let i = 0; i < myPlayer.cardCount; i++) myHandStrip.appendChild(facedownEl());
+    }
+
+    const infoDiv = document.createElement('div');
+    infoDiv.className = 'my-info';
+    infoDiv.innerHTML = `
       <div class="my-name">${myPlayer.name}${isDealer ? ' 🅓' : ''}${isActive ? ' ◀' : ''}</div>
       <div class="my-chips">${myPlayer.chips} chips</div>
       ${myPlayer.bet > 0 ? `<div class="my-bet">Bet: ${myPlayer.bet}</div>` : ''}
+      ${myPlayer.folded ? '<div style="color:#e94560;font-size:.7rem">FOLDED</div>' : ''}
+      ${myPlayer.allIn ? '<div style="color:#e67e22;font-size:.7rem">ALL-IN</div>' : ''}
     `;
-    for (const c of myPlayer.hand) myHandStrip.appendChild(cardEl(c));
-    myHandStrip.appendChild(info);
-  } else if (myPlayer && state.stage !== 'waiting') {
-    // folded
-    const info = document.createElement('div');
-    info.className = 'my-info';
-    info.innerHTML = `<div class="my-name">${myPlayer.name} [FOLDED]</div><div class="my-chips">${myPlayer.chips} chips</div>`;
-    myHandStrip.appendChild(info);
+    myHandStrip.appendChild(infoDiv);
   }
 }
 
-// ── Betting info panel ──
+// ── Betting info + raise builder ──
 function renderBettingInfo(info, myPlayer) {
-  const { isPotLimit, potSize, currentBet, callAmount, maxRaiseTo, minRaiseTo } = info;
+  const { isPotLimit, potSize, currentBet, callAmount, maxRaiseTo, minRaiseTo, minRaise } = info;
+
+  // Store for +/- handlers
+  lastInfo = { ...info, myChipsTotal: myPlayer.chips + myPlayer.bet };
+
+  // Top info row
   potInfo.textContent    = `Pot: ${potSize}`;
   toCallInfo.textContent = callAmount > 0 ? `To call: ${callAmount}` : 'No bet';
-  limitInfo.textContent  = isPotLimit ? 'Pot Limit' : 'No Limit';
-  chipsDisplay.textContent = `Chips: ${myPlayer.chips}`;
+  limitInfo.innerHTML    = `<span class="limit-badge">${isPotLimit ? 'Pot Limit' : 'No Limit'}</span>`;
 
-  const minTo = minRaiseTo;
-  const maxTo = isPotLimit ? Math.floor(maxRaiseTo) : myPlayer.chips + myPlayer.bet;
-  raiseInput.min         = minTo;
-  raiseInput.max         = maxTo;
-  raiseInput.placeholder = `Raise to ${minTo}+`;
-
+  // Show/hide check vs call
   document.getElementById('checkBtn').classList.toggle('hidden', callAmount > 0);
   document.getElementById('callBtn').classList.toggle('hidden', callAmount === 0);
   document.getElementById('callBtn').textContent = `Call ${callAmount}`;
+
+  // Label Raise vs Bet
+  const isBet = currentBet === 0;
+  document.getElementById('raiseBtn').textContent = isBet ? 'Bet' : 'Raise';
+  document.getElementById('raiseConfirm').textContent = isBet ? 'Bet' : 'Raise';
+
+  // Max for no-limit = all their chips total
+  const myTotal = myPlayer.chips + myPlayer.bet;
+  const maxTo   = isPotLimit ? Math.floor(maxRaiseTo) : myTotal;
+
+  // Limits display
+  raiseLimits.innerHTML = `
+    <span>Min: <strong>${minRaiseTo}</strong></span>
+    <span>${isPotLimit ? `Max (pot): <strong>${maxTo}</strong>` : `All-in: <strong>${myTotal}</strong>`}</span>
+  `;
+
+  // Preset buttons
+  raisePresets.innerHTML = '';
+  const presets = buildPresets(isPotLimit, potSize, callAmount, minRaiseTo, maxTo, myTotal);
+  for (const { label, value } of presets) {
+    const btn = document.createElement('button');
+    btn.className = 'preset-btn';
+    btn.textContent = label;
+    btn.addEventListener('click', () => { raiseInput.value = value; });
+    raisePresets.appendChild(btn);
+  }
+
+  // Pre-fill raise input with min raise
+  raiseInput.value = minRaiseTo;
+  raiseInput.min   = minRaiseTo;
+  raiseInput.max   = maxTo;
+  raiseInput.step  = minRaise || 20;
+}
+
+function buildPresets(isPotLimit, pot, callAmount, minTo, maxTo, myTotal) {
+  const presets = [];
+  presets.push({ label: 'Min', value: minTo });
+
+  if (!isPotLimit) {
+    // Half pot
+    const halfPot = Math.max(minTo, Math.floor(pot / 2));
+    if (halfPot > minTo && halfPot < myTotal) presets.push({ label: '½ Pot', value: halfPot });
+    // Full pot
+    const fullPot = Math.max(minTo, pot);
+    if (fullPot > minTo && fullPot < myTotal) presets.push({ label: 'Pot', value: fullPot });
+    // 2x pot
+    const twoPot = Math.max(minTo, pot * 2);
+    if (twoPot > fullPot && twoPot < myTotal) presets.push({ label: '2× Pot', value: twoPot });
+  } else {
+    // Pot limit: only preset is the max
+    if (maxTo > minTo) presets.push({ label: 'Max (Pot)', value: maxTo });
+  }
+
+  // All-in (only if different from max)
+  if (myTotal > minTo && myTotal !== maxTo) presets.push({ label: 'All-in', value: myTotal });
+
+  return presets;
 }
 
 function showError(msg) {
@@ -340,5 +468,4 @@ function showError(msg) {
   setTimeout(() => el.remove(), 3000);
 }
 
-// Re-render on resize (desktop ↔ mobile switch)
 window.addEventListener('resize', () => { if (lastState) renderState(lastState); });

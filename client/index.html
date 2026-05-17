@@ -31,7 +31,7 @@
       <span id="stageDisplay"></span>
     </div>
 
-    <!-- MOBILE layout (shown only on small screens via JS) -->
+    <!-- MOBILE layout -->
     <div id="mobileLayout" class="hidden">
       <div id="mobileOpponents"></div>
       <div class="center-area">
@@ -39,16 +39,17 @@
         <div id="potDisplayMobile" class="pot">Pot: 0</div>
       </div>
       <div id="myHandStrip"></div>
-      <!-- panels injected here by JS on mobile -->
     </div>
 
-    <!-- DESKTOP layout -->
+    <!-- DESKTOP layout: opponents sit around the table in absolute positions -->
     <div id="desktopLayout">
       <div class="center-area">
         <div id="communityCards" class="card-row"></div>
         <div id="potDisplay" class="pot">Pot: 0</div>
       </div>
       <div id="seats"></div>
+      <!-- My hand always anchored above the bottom panel -->
+      <div id="myHandDesktop"></div>
     </div>
 
     <!-- Waiting panel -->
@@ -70,12 +71,19 @@
         <button id="foldBtn"  class="btn-fold">Fold</button>
         <button id="checkBtn" class="btn-check">Check</button>
         <button id="callBtn"  class="btn-call">Call</button>
-        <button id="raiseBtn" class="btn-raise">Raise</button>
+        <button id="raiseBtn" class="btn-raise" id="raiseConfirmBtn">Raise</button>
         <button id="allInBtn" class="btn-allin">All In</button>
       </div>
-      <div class="raise-row">
-        <input id="raiseInput" type="number" min="0" step="10" placeholder="Raise to…" />
-        <span id="chipsDisplay"></span>
+      <!-- Raise builder row -->
+      <div id="raiseBuilder" class="raise-builder hidden">
+        <div class="raise-limits" id="raiseLimits"></div>
+        <div class="raise-presets" id="raisePresets"></div>
+        <div class="raise-row">
+          <button class="raise-adj" id="raiseMinus">−</button>
+          <input id="raiseInput" type="number" min="0" step="10" />
+          <button class="raise-adj" id="raisePlus">+</button>
+          <button id="raiseConfirm" class="btn-raise">Raise</button>
+        </div>
       </div>
     </div>
 
