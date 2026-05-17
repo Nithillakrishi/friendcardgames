@@ -206,7 +206,6 @@ function renderState(state) {
     waitingPanel.classList.add('hidden');
     actionPanel.classList.add('hidden');
     raiseBuilder.classList.add('hidden');
-    // Countdown handled by winnerBanner; table stays visible with face-up cards
   } else {
     waitingPanel.classList.add('hidden');
     if (isMyTurn && bettingInfo) {
@@ -216,6 +215,21 @@ function renderState(state) {
     } else {
       actionPanel.classList.add('hidden');
       raiseBuilder.classList.add('hidden');
+    }
+  }
+
+  // Desktop: position myHandDesktop just above action panel when panel is visible,
+  // or at the very bottom when there's no panel (showdown / not my turn)
+  if (!isMobile()) {
+    const panelVisible = !actionPanel.classList.contains('hidden');
+    if (panelVisible) {
+      // Measure panel height after it's been rendered
+      requestAnimationFrame(() => {
+        const h = actionPanel.offsetHeight;
+        myHandDesktop.style.bottom = (14 + h + 10) + 'px';
+      });
+    } else {
+      myHandDesktop.style.bottom = '20px';
     }
   }
 }
