@@ -96,7 +96,7 @@ io.on('connection', (socket) => {
         g.prepareNextRound();          // clean up broke players, set stage='waiting'
         if (g.canStart()) g.startRound();
         broadcastState(roomId);
-      }, 30000);
+      }, 20000);
     }
   });
 

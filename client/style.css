@@ -187,22 +187,33 @@ button:active { filter: brightness(.8); }
 #raiseInput:focus { border-color: #8e44ad; }
 #raiseConfirm { padding: 8px 16px; flex-shrink: 0; }
 
-/* ── Winner banner (non-blocking toast at top) ── */
+/* ── Winner banner (non-blocking toast) ── */
 .winner-banner {
   position: fixed; top: 36px; left: 50%; transform: translateX(-50%);
   background: #16213eee; border: 1px solid #e94560;
   border-radius: 10px; padding: 8px 20px;
-  z-index: 200; text-align: center;
+  z-index: 200; text-align: center; max-width: 90vw;
   backdrop-filter: blur(6px);
   animation: fadeInDown .3s ease;
 }
-.winner-banner .winner-line { font-size: .9rem; white-space: nowrap; }
+.winner-banner .winner-line { font-size: .9rem; }
 .winner-banner .winner-line strong { color: #f0c040; }
 .winner-banner .winner-line .hand-name { color: #80cfa9; font-style: italic; }
 .winner-banner .countdown { font-size: .75rem; color: #888; margin-top: 4px; }
 @keyframes fadeInDown {
   from { opacity:0; transform: translateX(-50%) translateY(-10px); }
   to   { opacity:1; transform: translateX(-50%) translateY(0); }
+}
+/* On mobile, center the banner vertically so it doesn't cover opponent cards at top */
+@media (max-width: 600px) {
+  .winner-banner {
+    top: 50%; transform: translate(-50%, -50%);
+    animation: fadeIn .3s ease;
+  }
+  @keyframes fadeIn {
+    from { opacity:0; }
+    to   { opacity:1; }
+  }
 }
 
 /* ── Helpers ── */
@@ -239,6 +250,10 @@ button:active { filter: brightness(.8); }
   .mob-seat .hand-cards .card { width: 30px; height: 44px; border-radius: 5px; border-width: 1.5px; }
   .mob-seat .hand-cards .card .rank { font-size: .75rem; }
   .mob-seat .hand-cards .card .suit { font-size: .6rem; }
+  /* Bigger cards during showdown so opponents' hands are readable */
+  .mob-seat.showdown-reveal .hand-cards .card { width: 46px; height: 66px; border-radius: 7px; }
+  .mob-seat.showdown-reveal .hand-cards .card .rank { font-size: 1rem; }
+  .mob-seat.showdown-reveal .hand-cards .card .suit { font-size: .85rem; }
 
   .center-area { flex: 1; position: static !important; justify-content: center; }
   .card-row .card { width: 52px; height: 76px; }

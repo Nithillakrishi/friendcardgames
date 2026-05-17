@@ -166,7 +166,7 @@ socket.on('showdown', ({ results }) => {
   }).join('');
 
   if (countdownInterval) clearInterval(countdownInterval);
-  let secs = 30;
+  let secs = 20;
   const tick = () => {
     winnerResults.innerHTML = lines + `<div class="countdown">Next hand in ${secs}s</div>`;
     if (secs <= 0) {
@@ -337,6 +337,7 @@ function renderMobile(state, myPlayer, isMyTurn) {
     seat.className = 'mob-seat';
     if (player.folded) seat.classList.add('folded');
     if (realIdx === actionIndex && !player.folded) seat.classList.add('is-active');
+    if (state.stage === 'showdown') seat.classList.add('showdown-reveal');
 
     if (realIdx === dealerIndex) {
       const d = document.createElement('div');
