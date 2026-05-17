@@ -12,11 +12,11 @@
     <div class="lobby-box">
       <h1>Friend Poker</h1>
       <p class="subtitle">Texas Hold'em — play with friends</p>
-      <input id="nameInput" type="text" placeholder="Your name" maxlength="16" />
+      <input id="nameInput" type="text" placeholder="Your name" maxlength="16" autocomplete="off" />
       <div class="lobby-buttons">
         <button id="createBtn">Create Room</button>
         <div class="join-row">
-          <input id="roomInput" type="text" placeholder="Room code" maxlength="6" />
+          <input id="roomInput" type="text" placeholder="Room code" maxlength="6" autocomplete="off" />
           <button id="joinBtn">Join</button>
         </div>
       </div>
@@ -31,16 +31,27 @@
       <span id="stageDisplay"></span>
     </div>
 
-    <!-- Community cards + pot -->
-    <div class="center-area">
-      <div id="communityCards" class="card-row"></div>
-      <div id="potDisplay" class="pot">Pot: 0</div>
+    <!-- MOBILE layout (shown only on small screens via JS) -->
+    <div id="mobileLayout" class="hidden">
+      <div id="mobileOpponents"></div>
+      <div class="center-area">
+        <div id="communityCardsMobile" class="card-row"></div>
+        <div id="potDisplayMobile" class="pot">Pot: 0</div>
+      </div>
+      <div id="myHandStrip"></div>
+      <!-- panels injected here by JS on mobile -->
     </div>
 
-    <!-- Seats around the table -->
-    <div id="seats"></div>
+    <!-- DESKTOP layout -->
+    <div id="desktopLayout">
+      <div class="center-area">
+        <div id="communityCards" class="card-row"></div>
+        <div id="potDisplay" class="pot">Pot: 0</div>
+      </div>
+      <div id="seats"></div>
+    </div>
 
-    <!-- Waiting / Start -->
+    <!-- Waiting panel -->
     <div id="waitingPanel" class="panel">
       <p>Share the room code with friends:</p>
       <div class="room-code" id="roomCode"></div>
@@ -48,7 +59,7 @@
       <p class="hint">Need at least 2 players</p>
     </div>
 
-    <!-- Betting controls -->
+    <!-- Action panel -->
     <div id="actionPanel" class="panel hidden">
       <div class="bet-info">
         <span id="potInfo"></span>
@@ -56,14 +67,14 @@
         <span id="limitInfo"></span>
       </div>
       <div class="action-buttons">
-        <button id="foldBtn" class="btn-fold">Fold</button>
+        <button id="foldBtn"  class="btn-fold">Fold</button>
         <button id="checkBtn" class="btn-check">Check</button>
-        <button id="callBtn" class="btn-call">Call</button>
+        <button id="callBtn"  class="btn-call">Call</button>
         <button id="raiseBtn" class="btn-raise">Raise</button>
         <button id="allInBtn" class="btn-allin">All In</button>
       </div>
       <div class="raise-row">
-        <input id="raiseInput" type="number" min="0" step="10" placeholder="Raise to..." />
+        <input id="raiseInput" type="number" min="0" step="10" placeholder="Raise to…" />
         <span id="chipsDisplay"></span>
       </div>
     </div>

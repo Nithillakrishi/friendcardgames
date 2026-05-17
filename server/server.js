@@ -22,16 +22,14 @@ function getPlayerId(socketId) { return socketToRoom[socketId]?.playerId; }
 function broadcastState(roomId) {
   const game = rooms[roomId];
   if (!game) return;
-  for (const p of game.players) {
-    const playerSocket = [...io.sockets.sockets.values()].find(
-      s => getPlayerId(s.id) === p.id
-    );
-    if (playerSocket) {
-      playerSocket.emit('gameState', game.publicState(p.id));
-    }
+  const playerIds = new Set(game.players.map(p => p.id));
+  for (const socket of io.sockets.sockets.values()) {
+    const info = socketToRoom[socket.id];
+    if (!info || info.roomId !== roomId) continue;
+    // Send personalized state (with own cards) if they're a player, else generic
+    const forId = playerIds.has(info.playerId) ? info.playerId : null;
+    socket.emit('gameState', game.publicState(forId));
   }
-  // Also broadcast to spectators in room
-  io.to(roomId).emit('gameState', game.publicState(null));
 }
 
 io.on('connection', (socket) => {

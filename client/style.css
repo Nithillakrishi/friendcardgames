@@ -4,21 +4,21 @@ body {
   font-family: 'Segoe UI', sans-serif;
   background: #1a1a2e;
   color: #eee;
-  height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  height: 100dvh;
   overflow: hidden;
 }
 
 /* ── Lobby ── */
-#lobby { display: flex; align-items: center; justify-content: center; width: 100%; }
+#lobby {
+  display: flex; align-items: center; justify-content: center;
+  height: 100dvh;
+}
 .lobby-box {
   background: #16213e;
   border: 2px solid #0f3460;
   border-radius: 16px;
-  padding: 40px;
-  width: 360px;
+  padding: 36px 28px;
+  width: min(360px, 94vw);
   text-align: center;
   box-shadow: 0 8px 32px #0006;
 }
@@ -33,83 +33,82 @@ body {
 .lobby-buttons { display: flex; flex-direction: column; gap: 10px; }
 button {
   padding: 10px 20px; border: none; border-radius: 8px;
-  font-size: 1rem; cursor: pointer; font-weight: 600; transition: opacity .2s;
+  font-size: 1rem; cursor: pointer; font-weight: 600; transition: opacity .15s;
+  touch-action: manipulation;
 }
-button:hover { opacity: .85; }
+button:active { opacity: .75; }
 #createBtn { background: #e94560; color: #fff; }
 .join-row { display: flex; gap: 8px; }
 .join-row #roomInput { margin: 0; flex: 1; }
 #joinBtn { background: #533483; color: #fff; white-space: nowrap; }
 .error { color: #e94560; margin-top: 12px; min-height: 20px; font-size: .85rem; }
 
-/* ── Game Table ── */
+/* ── Game Table (desktop) ── */
 #gameTable {
-  width: 100vw; height: 100vh;
+  width: 100vw; height: 100dvh;
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
   position: relative;
   background: radial-gradient(ellipse 80% 60% at 50% 50%, #1a5c2e 0%, #0d3320 60%, #0a2218 100%);
 }
+
 .table-header {
-  position: absolute; top: 12px; left: 0; right: 0;
-  display: flex; justify-content: space-between; padding: 0 20px;
-  font-size: .9rem; color: #aaa;
+  position: absolute; top: 10px; left: 0; right: 0;
+  display: flex; justify-content: space-between; padding: 0 16px;
+  font-size: .85rem; color: #aaa; z-index: 10;
 }
 #stageDisplay { text-transform: uppercase; color: #f0c040; font-weight: 700; }
 
 /* ── Community + Pot ── */
 .center-area {
   display: flex; flex-direction: column; align-items: center; gap: 10px;
-  z-index: 2;
+  z-index: 2; pointer-events: none;
 }
-.card-row { display: flex; gap: 8px; min-height: 90px; align-items: center; }
-.pot { font-size: 1.3rem; font-weight: 700; color: #f0c040; }
+.card-row { display: flex; gap: 6px; min-height: 86px; align-items: center; }
+.pot { font-size: 1.2rem; font-weight: 700; color: #f0c040; }
 
 /* ── Cards ── */
 .card {
-  width: 60px; height: 86px;
-  border-radius: 8px;
+  width: 58px; height: 84px; border-radius: 8px;
   display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  font-size: 1.1rem; font-weight: 800;
-  border: 2px solid #555;
-  background: #fff;
-  color: #222;
+  align-items: center; justify-content: center; gap: 2px;
+  font-weight: 800; border: 2px solid #ccc;
+  background: #fff; color: #222;
   box-shadow: 2px 3px 8px #0006;
-  transition: transform .2s;
-  position: relative;
+  flex-shrink: 0;
 }
 .card.red { color: #c0392b; }
 .card.back {
-  background: linear-gradient(135deg, #1a3a6e 0%, #0d1f40 100%);
+  background: repeating-linear-gradient(135deg,#1a3a6e,#1a3a6e 5px,#0d1f40 5px,#0d1f40 10px);
   border-color: #2255aa;
 }
-.card .rank { font-size: 1.3rem; line-height: 1; }
+.card .rank { font-size: 1.2rem; line-height: 1; }
 .card .suit { font-size: 1rem; line-height: 1; }
-.card.hidden-card { background: repeating-linear-gradient(45deg,#1a3a6e,#1a3a6e 5px,#0d1f40 5px,#0d1f40 10px); }
 
-/* ── Seats ── */
+/* ── Desktop Seats (absolute) ── */
 #seats { position: absolute; inset: 0; pointer-events: none; }
 .seat {
   position: absolute;
-  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
   pointer-events: none;
-  min-width: 100px;
 }
 .seat-name {
-  font-size: .78rem; font-weight: 700; white-space: nowrap;
-  background: #0008; padding: 2px 8px; border-radius: 12px;
+  font-size: .75rem; font-weight: 700; white-space: nowrap;
+  background: #0009; padding: 2px 8px; border-radius: 12px;
+  max-width: 110px; overflow: hidden; text-overflow: ellipsis;
 }
-.seat-chips { font-size: .75rem; color: #f0c040; }
-.seat-bet { font-size: .72rem; color: #80cfa9; }
+.seat-chips { font-size: .72rem; color: #f0c040; }
+.seat-bet   { font-size: .7rem;  color: #80cfa9; }
 .seat.is-active .seat-name { background: #e94560cc; animation: pulse 1s infinite; }
-.seat.folded { opacity: .4; }
+.seat.folded { opacity: .35; }
 .seat.is-me .seat-name { border: 2px solid #f0c040; }
 .seat .hand-cards { display: flex; gap: 4px; }
-.seat .hand-cards .card { width: 40px; height: 58px; font-size: .8rem; }
+.seat .hand-cards .card { width: 42px; height: 60px; }
+.seat .hand-cards .card .rank { font-size: 1rem; }
+.seat .hand-cards .card .suit { font-size: .85rem; }
 .dealer-chip {
   width: 18px; height: 18px; border-radius: 50%;
-  background: #f0c040; color: #222; font-size: .6rem; font-weight: 900;
+  background: #f0c040; color: #222; font-size: .58rem; font-weight: 900;
   display: flex; align-items: center; justify-content: center;
   border: 1px solid #a08000;
 }
@@ -117,23 +116,21 @@ button:hover { opacity: .85; }
 
 /* ── Panels ── */
 .panel {
-  position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%);
+  position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%);
   background: #16213edd; border: 1px solid #0f3460;
-  border-radius: 14px; padding: 14px 20px;
-  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  border-radius: 14px; padding: 12px 18px;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
   backdrop-filter: blur(6px);
-  min-width: 340px;
+  min-width: 320px; max-width: 96vw;
+  z-index: 20;
 }
-.room-code {
-  font-size: 2.4rem; font-weight: 900; letter-spacing: .3em;
-  color: #f0c040; margin: 4px 0;
-}
-.hint { font-size: .8rem; color: #888; }
-#startBtn { background: #27ae60; color: #fff; }
+.room-code { font-size: 2.2rem; font-weight: 900; letter-spacing: .3em; color: #f0c040; }
+.hint { font-size: .78rem; color: #888; }
+#startBtn { background: #27ae60; color: #fff; width: 100%; }
 
 /* Action panel */
-.bet-info { display: flex; gap: 16px; font-size: .8rem; color: #aaa; }
-.action-buttons { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.bet-info { display: flex; gap: 14px; font-size: .78rem; color: #aaa; flex-wrap: wrap; justify-content: center; }
+.action-buttons { display: flex; gap: 7px; flex-wrap: wrap; justify-content: center; }
 .btn-fold  { background: #c0392b; color:#fff; }
 .btn-check { background: #2980b9; color:#fff; }
 .btn-call  { background: #27ae60; color:#fff; }
@@ -141,35 +138,119 @@ button:hover { opacity: .85; }
 .btn-allin { background: #e67e22; color:#fff; }
 .raise-row { display: flex; gap: 8px; align-items: center; width: 100%; }
 .raise-row input {
-  flex: 1; padding: 7px 12px; border-radius: 8px;
+  flex: 1; padding: 7px 10px; border-radius: 8px;
   border: 1px solid #0f3460; background: #0f3460;
-  color: #eee; font-size: .95rem; outline: none;
+  color: #eee; font-size: .95rem; outline: none; min-width: 0;
 }
 .raise-row input:focus { border-color: #8e44ad; }
-#chipsDisplay { font-size: .8rem; color: #f0c040; white-space: nowrap; }
+#chipsDisplay { font-size: .78rem; color: #f0c040; white-space: nowrap; }
 
 /* ── Overlay ── */
 .overlay {
-  position: absolute; inset: 0;
-  background: #000a;
+  position: fixed; inset: 0;
+  background: #000b;
   display: flex; align-items: center; justify-content: center;
-  z-index: 100;
+  z-index: 200;
 }
 .showdown-box {
   background: #16213e; border: 2px solid #e94560;
-  border-radius: 16px; padding: 32px 40px;
-  text-align: center; min-width: 300px;
+  border-radius: 16px; padding: 28px 36px;
+  text-align: center; min-width: min(300px, 90vw);
+  max-width: 90vw;
 }
-.showdown-box h2 { color: #f0c040; margin-bottom: 16px; }
-.winner-line { margin: 6px 0; font-size: 1rem; }
+.showdown-box h2 { color: #f0c040; margin-bottom: 14px; }
+.winner-line { margin: 6px 0; font-size: .95rem; }
 .winner-line strong { color: #f0c040; }
 .winner-line .hand-name { color: #80cfa9; font-style: italic; }
 
 /* ── Helpers ── */
 .hidden { display: none !important; }
 
-/* ── Responsive ── */
+/* ════════════════════════════════════════
+   MOBILE  (portrait ≤ 600px)
+   Layout: opponents top | community middle | my cards + panel bottom
+   ════════════════════════════════════════ */
 @media (max-width: 600px) {
-  .card { width: 44px; height: 64px; font-size: .8rem; }
-  .seat .hand-cards .card { width: 32px; height: 46px; font-size: .65rem; }
+  #gameTable {
+    flex-direction: column;
+    justify-content: flex-start;
+    background: radial-gradient(ellipse 120% 80% at 50% 40%, #1a5c2e 0%, #0d3320 60%, #0a2218 100%);
+  }
+
+  /* Hide the absolute seat layer on mobile — we use mobile-layout divs instead */
+  #seats { display: none; }
+
+  /* Mobile layout wrapper */
+  #mobileLayout {
+    display: flex; flex-direction: column;
+    width: 100%; height: 100dvh;
+    padding-top: 36px; /* space for header */
+  }
+
+  /* Opponents row at top */
+  #mobileOpponents {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 8px;
+    padding: 4px 8px 6px;
+    flex-shrink: 0;
+  }
+  .mob-seat {
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    background: #0007; border-radius: 10px; padding: 4px 8px;
+    min-width: 70px;
+  }
+  .mob-seat-name {
+    font-size: .7rem; font-weight: 700; white-space: nowrap;
+    max-width: 80px; overflow: hidden; text-overflow: ellipsis;
+  }
+  .mob-seat-chips { font-size: .65rem; color: #f0c040; }
+  .mob-seat-bet   { font-size: .63rem; color: #80cfa9; }
+  .mob-seat.is-active .mob-seat-name { color: #e94560; }
+  .mob-seat.folded { opacity: .35; }
+  .mob-seat .hand-cards { display: flex; gap: 3px; }
+  .mob-seat .hand-cards .card { width: 30px; height: 44px; border-radius: 5px; border-width: 1.5px; }
+  .mob-seat .hand-cards .card .rank { font-size: .75rem; }
+  .mob-seat .hand-cards .card .suit { font-size: .6rem; }
+  .mob-dealer { font-size: .55rem; background: #f0c040; color:#222; border-radius: 50%; width:14px; height:14px; display:flex; align-items:center; justify-content:center; font-weight:900; }
+
+  /* Community area stretches to fill middle */
+  .center-area {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 8px;
+    position: static !important;
+  }
+  .card-row .card { width: 52px; height: 76px; }
+  .card-row .card .rank { font-size: 1.1rem; }
+  .card-row .card .suit { font-size: .9rem; }
+
+  /* My hand — fixed strip above action panel */
+  #myHandStrip {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    padding: 6px 0 4px; flex-shrink: 0;
+  }
+  #myHandStrip .card { width: 58px; height: 84px; }
+  #myHandStrip .card .rank { font-size: 1.3rem; }
+  #myHandStrip .card .suit { font-size: 1rem; }
+  #myHandStrip .my-info { text-align: center; }
+  #myHandStrip .my-name { font-size: .8rem; font-weight:700; color:#f0c040; }
+  #myHandStrip .my-chips { font-size: .72rem; color: #aaa; }
+  #myHandStrip .my-bet   { font-size: .7rem;  color: #80cfa9; }
+
+  /* Action panel — sits at very bottom, not absolute */
+  .panel {
+    position: static !important;
+    transform: none !important;
+    border-radius: 14px 14px 0 0;
+    margin: 0; width: 100%; min-width: unset;
+    padding: 10px 12px 16px;
+    bottom: unset; left: unset;
+    flex-shrink: 0;
+  }
+  .action-buttons button { padding: 10px 14px; font-size: .92rem; }
+  .bet-info { font-size: .75rem; }
+}
+
+/* Landscape mobile tweak */
+@media (max-width: 900px) and (orientation: landscape) {
+  .panel { padding: 8px 14px 10px; }
+  .action-buttons button { padding: 8px 12px; font-size: .85rem; }
 }
