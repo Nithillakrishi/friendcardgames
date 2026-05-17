@@ -89,12 +89,14 @@ io.on('connection', (socket) => {
         results: result.results,
         community: result.community,
       });
+      // 30s window: hands stay face-up on the table, then reset for next hand
       setTimeout(() => {
         const g = rooms[roomId];
         if (!g) return;
-        if (g.canStart()) { g.startRound(); }
+        g.prepareNextRound();          // clean up broke players, set stage='waiting'
+        if (g.canStart()) g.startRound();
         broadcastState(roomId);
-      }, 5000);
+      }, 30000);
     }
   });
 

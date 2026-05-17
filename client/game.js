@@ -157,14 +157,27 @@ socket.on('gameState', state => {
   renderState(state);
 });
 
+let countdownInterval = null;
 socket.on('showdown', ({ results }) => {
   if (!lastState) return;
-  winnerResults.innerHTML = results.map(r => {
+  const lines = results.map(r => {
     const p = lastState.players[r.index];
     return `<div class="winner-line"><strong>${p ? p.name : 'Player'}</strong> wins <strong>${r.chips}</strong> with <span class="hand-name">${r.handName}</span></div>`;
   }).join('');
+
+  if (countdownInterval) clearInterval(countdownInterval);
+  let secs = 30;
+  const tick = () => {
+    winnerResults.innerHTML = lines + `<div class="countdown">Next hand in ${secs}s</div>`;
+    if (secs <= 0) {
+      clearInterval(countdownInterval);
+      winnerBanner.classList.add('hidden');
+    }
+    secs--;
+  };
   winnerBanner.classList.remove('hidden');
-  setTimeout(() => winnerBanner.classList.add('hidden'), 3500);
+  tick();
+  countdownInterval = setInterval(tick, 1000);
 });
 
 // ── Main render ──
@@ -187,7 +200,13 @@ function renderState(state) {
   if (stage === 'waiting') {
     waitingPanel.classList.remove('hidden');
     actionPanel.classList.add('hidden');
-    if (isMobile()) { mobileLayout.appendChild(waitingPanel); }
+    raiseBuilder.classList.add('hidden');
+    if (isMobile()) mobileLayout.appendChild(waitingPanel);
+  } else if (stage === 'showdown') {
+    waitingPanel.classList.add('hidden');
+    actionPanel.classList.add('hidden');
+    raiseBuilder.classList.add('hidden');
+    // Countdown handled by winnerBanner; table stays visible with face-up cards
   } else {
     waitingPanel.classList.add('hidden');
     if (isMyTurn && bettingInfo) {
@@ -397,6 +416,9 @@ function renderBettingInfo(info, myPlayer) {
   document.getElementById('checkBtn').classList.toggle('hidden', callAmount > 0);
   document.getElementById('callBtn').classList.toggle('hidden', callAmount === 0);
   document.getElementById('callBtn').textContent = `Call ${callAmount}`;
+
+  // Hide All-In button pre-flop (pot limit — all-in would violate pot limit cap)
+  document.getElementById('allInBtn').classList.toggle('hidden', isPotLimit);
 
   // Label Raise vs Bet
   const isBet = currentBet === 0;

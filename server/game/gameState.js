@@ -25,7 +25,7 @@ class Game {
 
   addPlayer(id, name) {
     if (this.players.length >= 9) return { error: 'Room full' };
-    if (this.stage !== 'waiting') return { error: 'Game in progress' };
+    if (this.stage !== 'waiting' && this.stage !== 'showdown') return { error: 'Game in progress' };
     if (this.players.find(p => p.id === id)) return { error: 'Already in room' };
     const seat = this.players.length;
     this.players.push({
@@ -259,22 +259,22 @@ class Game {
         return { index: this.players.indexOf(player), handName: w.handName, chips: award };
       });
     }
+    // Stay in 'showdown' stage — server calls prepareNextRound() after the delay
+    return { ok: true, stage: 'showdown', results, community: this.community };
+  }
 
-    // Remove disconnected/broke players, reset remaining to waiting
+  // Called by server after the between-hand delay to clean up and reset
+  prepareNextRound() {
     this.players = this.players.filter(p => p.chips > 0 && p.connected);
     this.players.forEach((p, i) => { p.seatIndex = i; });
-
-    if (this.players.length >= 2) {
-      // Auto-reset stage to waiting so next startRound() can be called
-      this.stage = 'waiting';
-    }
-
-    return { ok: true, stage: 'showdown', results, community: this.community };
+    this.stage = 'waiting';
   }
 
   publicState(forPlayerId = null) {
     const cp = this.stage !== 'waiting' && this.stage !== 'showdown'
       ? this.bettingInfo() : null;
+    // During showdown everyone's hand is revealed
+    const showAll = this.stage === 'showdown';
     return {
       stage: this.stage, pot: this.pot, community: this.community,
       currentBet: this.currentBet, actionIndex: this.actionIndex,
@@ -284,7 +284,7 @@ class Game {
         folded: p.folded, allIn: p.allIn,
         seatIndex: p.seatIndex, connected: p.connected,
         cardCount: p.hand.length,
-        hand: p.id === forPlayerId ? p.hand : null,
+        hand: (showAll || p.id === forPlayerId) ? p.hand : null,
       })),
       bettingInfo: cp,
     };
