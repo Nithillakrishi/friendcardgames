@@ -3,8 +3,8 @@
 const { freshDeck } = require('./deck');
 const { determineWinners } = require('./handEvaluator');
 
-const BIG_BLIND = 20;
-const SMALL_BLIND = 10;
+const BIG_BLIND = 10;
+const SMALL_BLIND = 5;
 const STARTING_CHIPS = 1000;
 
 class Game {
